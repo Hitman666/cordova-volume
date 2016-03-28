@@ -52,7 +52,7 @@
 - (Boolean)isMuted{
     bool isMuted = false;
 
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0") && ([[AVAudioSession sharedInstance] outputVolume] < 0.1)) {
+    /*if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0") && ([[AVAudioSession sharedInstance] outputVolume] < 0.1)) {
         isMuted = true;
     }
     else{
@@ -71,7 +71,19 @@
           isMuted = true;
         }
       }
-  }
+    }*/
+
+    Class avSystemControllerClass = NSClassFromString(@"AVSystemController");
+    id avSystemControllerInstance = [avSystemControllerClass performSelector:@selector(sharedAVSystemController)];
+
+    NSInvocation *privateInvocation = [NSInvocation invocationWithMethodSignature:
+                                      [avSystemControllerClass instanceMethodSignatureForSelector:
+                                       @selector(getActiveCategoryMuted:)]];
+
+    [privateInvocation setTarget:avSystemControllerInstance];
+    [privateInvocation setSelector:@selector(getActiveCategoryMuted:)];
+    [privateInvocation setArgument:&isMuted atIndex:2];
+    [privateInvocation invoke];
 
   return isMuted;
 }
